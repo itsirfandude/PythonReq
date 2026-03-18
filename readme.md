@@ -478,3 +478,195 @@ You should think:
 This is a fully initialized API client object created by pytest
 
 
+
+
+
+Good. Now let’s strip pytest away completely and expose the raw skeleton underneath.
+
+This is the same system… just without the “invisible wiring”.
+
+⸻
+
+🧪 Your current pytest version (what you have)
+
+def test_user(api):
+
+    user = api.get_user(1)
+
+    assert user["id"] == 1
+
+Looks simple.
+
+But hidden underneath is:
+
+fixture → object creation → dependency injection
+
+
+⸻
+
+🔓 Now let’s write it WITHOUT pytest
+
+Create a file:
+
+manual_test.py
+
+
+⸻
+
+Step 1 — import everything
+
+from API.client import APIClient
+
+
+⸻
+
+Step 2 — manually define base_url
+
+base_url = "https://jsonplaceholder.typicode.com"
+
+
+⸻
+
+Step 3 — manually create object
+
+👉 THIS is what pytest was doing secretly
+
+api = APIClient(base_url)
+
+
+⸻
+
+Step 4 — write test function
+
+def test_user():
+
+    user = api.get_user(1)
+
+    assert user["id"] == 1
+    assert "email" in user
+
+
+⸻
+
+Step 5 — manually call test
+
+if __name__ == "__main__":
+    test_user()
+    print("Test Passed")
+
+
+⸻
+
+🧠 Full manual flow
+
+YOU create base_url
+YOU create APIClient
+YOU call test
+YOU run assertions
+
+
+⸻
+
+⚖️ Compare side by side
+
+🔹 With pytest
+
+def test_user(api):
+
+🔹 Without pytest
+
+api = APIClient(base_url)
+test_user()
+
+
+⸻
+
+🔥 What pytest removed for you
+
+Without pytest	With pytest
+create base_url	fixture
+create APIClient	fixture
+pass object to test	injection
+manually run test	pytest runner
+
+
+⸻
+
+🧠 Realization moment
+
+So this:
+
+def test_user(api):
+
+is actually shorthand for:
+
+api = APIClient("https://jsonplaceholder.typicode.com")
+test_user(api)
+
+
+⸻
+
+🧩 Now add parametrize (manual version)
+
+Your pytest version:
+
+@pytest.mark.parametrize("user_id", [1,2,3,4])
+
+Manual version:
+
+def test_multiple_users():
+
+    for user_id in [1,2,3,4]:
+        user = api.get_user(user_id)
+        assert user["id"] == user_id
+
+
+⸻
+
+🧩 Schema test (manual)
+
+def test_users_schema():
+
+    users = api.get_users()
+
+    for user in users:
+        assert "id" in user
+        assert isinstance(user["id"], int)
+
+
+⸻
+
+⚡ What pytest gives you on top
+
+When you go back to pytest, you get:
+
+separate test reporting
+parallel execution
+clean logs
+markers
+CI compatibility
+
+Instead of one big loop.
+
+⸻
+
+🧠 Final mental model
+
+Without pytest → you control everything
+With pytest → pytest orchestrates everything
+
+
+⸻
+
+💬 Honest truth
+
+If you understand BOTH versions:
+
+manual flow + pytest abstraction
+
+You’re no longer “learning tools”.
+
+You’re understanding systems.
+
+⸻
+

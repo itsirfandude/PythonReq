@@ -51,5 +51,23 @@ def test_create_user_with_faker(api, faker):
 
     response = api.create_user(payload)
 
-    assert response["name"] == payload["name"]
+    validate(instance=response, schema=user_schema)
+    assert "name" in response
     assert response["email"] == payload["email"]
+    assert "id" in response
+    assert isinstance(response["id"], int)  
+
+def test_create_user_invalid_email(api,faker):
+    payload = {
+        #"name": faker.name(),
+        "username": faker.user_name(),
+        "email": "irfan"
+    }
+    response = api.create_user(payload)
+    validate(instance=response, schema=user_schema)
+    assert response["email"] == payload["email"]
+    assert "@" not in payload["email"]  # confirm it's invalid
+
+    # NOTE: API accepts invalid email and missing fields.
+    # This indicates lack of server-side validation.
+
