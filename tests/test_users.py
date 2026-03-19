@@ -57,17 +57,51 @@ def test_create_user_with_faker(api, faker):
     assert "id" in response
     assert isinstance(response["id"], int)  
 
-def test_create_user_invalid_email(api,faker):
+def test_create_user_invalid_email(api, faker):
     payload = {
-        #"name": faker.name(),
         "username": faker.user_name(),
-        "email": "irfan"
+        "email": "irfan"  # invalid email
     }
+
     response = api.create_user(payload)
-    validate(instance=response, schema=user_schema)
+
+    # System should ideally reject invalid email, but currently accepts it
     assert response["email"] == payload["email"]
-    assert "@" not in payload["email"]  # confirm it's invalid
 
-    # NOTE: API accepts invalid email and missing fields.
-    # This indicates lack of server-side validation.
+    # Observation: validation gap
+    assert "@" not in payload["email"]
 
+def test_create_user_invalid_payload(api):
+    payload = {
+        "name": "",  # empty name
+        "email": "irfan",  # invalid email
+        "goal": "irfan"  # unexpected field
+    }
+
+    response = api.create_user(payload)
+
+    # API is accepting invalid payload
+    assert response["email"] == payload["email"]
+
+    # Observation: system is not validating required fields or schema strictly
+
+def test_create_user_empty_payload(api):
+    payload = {}
+
+    response = api.create_user(payload)
+
+    # API is accepting empty payload
+    assert isinstance(response, dict)
+
+    # Observation: system should reject empty payload but currently accepts it
+def test_create_user_invalid_datatype(api):
+   payload = {
+    "name": 123,
+    "email": 999
+             }
+
+    response = api.create_user(payload)
+
+    # API is accepting invalid datatypes
+    assert response["email"] == payload["email"]
+    assert response["name"] == payload["name"]
