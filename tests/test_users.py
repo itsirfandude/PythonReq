@@ -94,11 +94,13 @@ def test_create_user_empty_payload(api):
     assert isinstance(response, dict)
 
     # Observation: system should reject empty payload but currently accepts it
+
+
 def test_create_user_invalid_datatype(api):
-   payload = {
-    "name": 123,
-    "email": 999
-             }
+    payload = {
+        "name": 123,
+        "email": 999
+    }
 
     response = api.create_user(payload)
 
