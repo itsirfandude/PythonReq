@@ -21,8 +21,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pytest requests pytest-html jsonschema faker
+          python -m pip install --upgrade pip
+          pip install pytest requests pytest-html jsonschema faker playwright
+
+      - name: Install Playwright Browsers
+        run: python -m playwright install --with-deps
 
       - name: Run tests
-        run: |
-          pytest -v --html=report.html
+        run: pytest -v --html=report.html
